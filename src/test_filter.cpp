@@ -45,6 +45,7 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
 #include <pcl_ros/transforms.h>
+#include <sensor_msgs/PointCloud2.h>
 
 class TestSelfFilter
 {
@@ -57,7 +58,7 @@ public:
 	std::vector<robot_self_filter::LinkInfo> links;
 	robot_self_filter::LinkInfo li;
         li.name="base_link";
-        li.padding = .05;
+        li.padding = 0.1;//.05;
         li.scale = 1.0;
         links.push_back(li);
 	sf_ = new robot_self_filter::SelfMask<pcl::PointXYZ>(tf_, links);
@@ -104,8 +105,12 @@ public:
 
     void run(void)
     {
- //        pcl::PointCloud<pcl::PointXYZ> in;
-	
+	    vmSub_ = nodeHandle_.subscribe("/merged_cloud", 1, &TestSelfFilter::cloud_cb, this);
+		ros::spinOnce();
+        pcl::PointCloud<pcl::PointXYZ> in;
+		in = *pcl_in;
+	    ROS_INFO("run init");
+
 	// in.header.stamp = ros::Time::now().toNSec();
 	// in.header.frame_id = "base_link";
 	
@@ -126,34 +131,41 @@ public:
 	
 	// ros::WallTime tm = ros::WallTime::now();
 	std::vector<int> mask;
-	sf_->maskIntersection(*pcl_in, "base_link", 0.01, mask, boost::bind(&TestSelfFilter::gotIntersection, this, _1) );
+	sf_->maskIntersection(in, "base_link", 0.01, mask, boost::bind(&TestSelfFilter::gotIntersection, this, _1) );
 	//	sf_->maskContainment(in, mask);
 	// printf("%f points per second\n", (double)N/(ros::WallTime::now() - tm).toSec());
 
-	
+	ROS_INFO("mask ran");
 	int k = 0;
 	for (unsigned int i = 0 ; i < mask.size() ; ++i)
 	{
-	    //	    bool v = sf_->getMaskContainment(in.points[i].x, in.points[i].y, in.points[i].z);
-	    //	    if (v != mask[i]) 
-	    //		ROS_ERROR("Mask does not match");	    
+				ROS_INFO("%.2f : %.2f : %.2f \n",in.points[i].x, in.points[i].y, in.points[i].z);
+	    	    bool v = sf_->getMaskContainment(in.points[i].x, in.points[i].y, in.points[i].z);
+	    	    if (v != mask[i]) 
+	    		ROS_ERROR("Mask does not match");	    
 	    if (mask[i] != robot_self_filter::INSIDE) continue;
-	    //	    sendPoint(in.points[i].x, in.points[i].y, in.points[i].z);
+	    	    sendPoint(in.points[i].x, in.points[i].y, in.points[i].z);
 	    k++;
 	}
 	
 	ros::spin();	
     }
 
-    void cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2>& input){
+    // void cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2>& input){
+
+    void cloud_cb(const sensor_msgs::PointCloud2ConstPtr input){
+    ROS_INFO("cb init");
 
     pcl::PCLPointCloud2 pcl_pc2;
+    // ROS_INFO("cb converting");
+
     pcl_conversions::toPCL(*input,pcl_pc2);
     pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
     //do stuff with temp_cloud here
 
     pcl_in = temp_cloud;
+    // ROS_INFO("data %d",input->height);
     }
 
 
@@ -179,10 +191,16 @@ int main(int argc, char **argv)
 
     TestSelfFilter t;
     ros::NodeHandle nh;
-    ros::Subscriber sub = nh.subscribe("/merged_cloud", 1, &TestSelfFilter::cloud_cb, &t);
+    // ROS_INFO("hello");
+
+    // ros::spin();
+    // ROS_INFO("sub_init");
 
     sleep(1);
     t.run();
+    // ROS_INFO("t-run");
+    // ros::spin();
+
     
     return 0;
 }
