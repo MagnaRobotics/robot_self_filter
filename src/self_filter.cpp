@@ -52,6 +52,7 @@ public:
     nh_.param<std::string>("sensor_frame", sensor_frame_, "camera_rgb_optical_frame");
     std::cout << "Sensor : " << sensor_frame_ << "\n";
     nh_.param("use_rgb", use_rgb_, false);
+    nh_.param("max_queue_size", max_queue_size_, 10);
     if (use_rgb_)
     {
       self_filter_rgb_ = new filters::SelfFilter<pcl::PointXYZRGB>(nh_);
@@ -116,10 +117,9 @@ private:
     }
     else
     {
-      ROS_INFO("Valid frames were passed in. We'll filter them.");
-      //sub_.subscribe(root_handle_, "cloud_in", 1);
-      sub_.subscribe(root_handle_, "/camera/depth/points", 1);
-      mn_.reset(new tf::MessageFilter<sensor_msgs::PointCloud2>(sub_, tf_, "", 1));
+      ROS_DEBUG("Valid frames were passed in. We'll filter them.");
+      sub_.subscribe(root_handle_, "cloud_in", max_queue_size_);
+      mn_.reset(new tf::MessageFilter<sensor_msgs::PointCloud2>(sub_, tf_, "", max_queue_size_));
       mn_->setTargetFrames(frames_);
       mn_->registerCallback(boost::bind(&SelfFilter::cloudCallback, this, _1));
     }
@@ -194,7 +194,7 @@ private:
 
   ros::Publisher                                        pointCloudPublisher_;
   ros::Subscriber                                       no_filter_sub_;
-
+  int max_queue_size_;
 };
 }
 
