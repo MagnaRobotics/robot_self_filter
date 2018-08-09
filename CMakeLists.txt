@@ -6,6 +6,8 @@ find_package(PkgConfig REQUIRED)
 
 find_package(Boost REQUIRED COMPONENTS signals)
 
+add_compile_options(-std=c++11)
+
 set(bullet_FOUND 0)
 pkg_check_modules(bullet REQUIRED bullet)
 
