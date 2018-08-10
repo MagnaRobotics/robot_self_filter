@@ -50,62 +50,18 @@ public:
   /** \brief Construct the filter */
   SelfFilter(ros::NodeHandle nh) : nh_(nh)
   {
-    nh_.param<double>("min_sensor_dist", min_sensor_dist_, 0.01);
+    nh_.param<double>("/min_sensor_dist", min_sensor_dist_, 0.01);
     double default_padding, default_scale;
-    nh_.param<double>("self_see_default_padding", default_padding, .02);
-    nh_.param<double>("self_see_default_scale", default_scale, 1.0);
-    nh_.param<bool>("keep_organized", keep_organized_, false);
+    nh_.param<double>("/self_see_default_padding", default_padding, .02);
+    nh_.param<double>("/self_see_default_scale", default_scale, 1.0);
+    nh_.param<bool>("/keep_organized", keep_organized_, false);
+    nh_.param<std::vector<std::string>>("/robot_link_names", robot_link_names, {"base_link"});
     std::vector<robot_self_filter::LinkInfo> links;
     std::string link_names;
-    std::vector<std::string> robot_link__names = {"base_link", "shoulder_link", "upper_arm_link", "forearm_link", "wrist_1_link", "wrist_2_link", "wrist_3_link"};
-    //std::vector<std::string> robot_link__names = {"base_link", "shoulder_link"};
-    // if(!nh_.hasParam("self_see_links")) {
-    //   ROS_WARN("No links specified for self filtering.");
-    // } else {
-    //
-    //   XmlRpc::XmlRpcValue ssl_vals;;
-    //
-    //   nh_.getParam("self_see_links", ssl_vals);
-    //   if(ssl_vals.getType() != XmlRpc::XmlRpcValue::TypeArray) {
-    //     ROS_WARN("Self see links need to be an array");
-    //
-    //   } else {
-    //     if(ssl_vals.size() == 0) {
-    //       ROS_WARN("No values in self see links array");
-    //     } else {
-    //       for(int i = 0; i < ssl_vals.size(); i++) {
-    //         robot_self_filter::LinkInfo li;
-    //
-    //         if(ssl_vals[i].getType() != XmlRpc::XmlRpcValue::TypeStruct) {
-    //           ROS_WARN("Self see links entry %d is not a structure.  Stopping processing of self see links",i);
-    //           break;
-    //         }
-    //         if(!ssl_vals[i].hasMember("name")) {
-    //           ROS_WARN("Self see links entry %d has no name.  Stopping processing of self see links",i);
-    //           break;
-    //         }
-    //         li.name = std::string(ssl_vals[i]["name"]);
-    //         if(!ssl_vals[i].hasMember("padding")) {
-    //           ROS_DEBUG("Self see links entry %d has no padding.  Assuming default padding of %g",i,default_padding);
-    //           li.padding = default_padding;
-    //         } else {
-    //           li.padding = ssl_vals[i]["padding"];
-    //         }
-    //         if(!ssl_vals[i].hasMember("scale")) {
-    //           ROS_DEBUG("Self see links entry %d has no scale.  Assuming default scale of %g",i,default_scale);
-    //           li.scale = default_scale;
-    //         } else {
-    //           li.scale = ssl_vals[i]["scale"];
-    //         }
-    //         links.push_back(li);
-    //       }
-    //     }
-    //   }
-    // }
 
-    for (int i = 0; i < robot_link__names.size(); i++) {
+    for (int i = 0; i < robot_link_names.size(); i++) {
       robot_self_filter::LinkInfo li;
-      li.name = robot_link__names[i];
+      li.name = robot_link_names[i];
       li.padding = default_padding;
       li.scale = default_scale;
       links.push_back(li);
@@ -263,6 +219,7 @@ protected:
   std::string sensor_frame_;
   double min_sensor_dist_;
   bool keep_organized_;
+  std::vector<std::string> robot_link_names;
 
 };
 
