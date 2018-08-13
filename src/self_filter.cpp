@@ -55,8 +55,8 @@ public:
     nh_.param<std::string>("/sensor_frame", sensor_frame_, "base_link");
     nh_.param("/use_rgb", use_rgb_, false);
     nh_.param("/max_queue_size", max_queue_size_, 10);
-    nh_.param<std::string>("/cloud_in", cloud_in, "merged_cloud");
-    nh_.param<std::string>("/cloud_out", cloud_out, "robot_filtered_cloud");
+    nh_.param<std::string>("/cloud_in", cloud_in, "/merged_cloud");
+    nh_.param<std::string>("/cloud_out", cloud_out, "/robot_filtered_cloud");
     if (use_rgb_)
     {
       self_filter_rgb_ = new filters::SelfFilter<pcl::PointXYZRGB>(nh_);

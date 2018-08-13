@@ -52,10 +52,10 @@ public:
   {
     nh_.param<double>("/min_sensor_dist", min_sensor_dist_, 0.01);
     double default_padding, default_scale;
-    nh_.param<double>("/self_see_default_padding", default_padding, .02);
+    nh_.param<double>("/self_see_default_padding", default_padding, .12);
     nh_.param<double>("/self_see_default_scale", default_scale, 1.0);
     nh_.param<bool>("/keep_organized", keep_organized_, false);
-    nh_.param<std::vector<std::string>>("/robot_link_names", robot_link_names, {"base_link"});
+    nh_.param<std::vector<std::string>>("/robot_link_names", robot_link_names, {"base_link","link_1","link_2","link_3","link_4","link_5","link_6","ee","front_rack","abb_control_box"});
     std::vector<robot_self_filter::LinkInfo> links;
     std::string link_names;
 
