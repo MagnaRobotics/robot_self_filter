@@ -52,10 +52,10 @@ public:
   SelfFilter(void): nh_("~"), subscribing_(false)
   {
     // nh_.param<std::string>("sensor_frame", sensor_frame_, std::string());
-    nh_.param<std::string>("/sensor_frame", sensor_frame_, "camera_rgb_optical_frame");
+    nh_.param<std::string>("/sensor_frame", sensor_frame_, "base_link");
     nh_.param("/use_rgb", use_rgb_, false);
     nh_.param("/max_queue_size", max_queue_size_, 10);
-    nh_.param<std::string>("/cloud_in", cloud_in, "camera/depth/points");
+    nh_.param<std::string>("/cloud_in", cloud_in, "merged_cloud");
     nh_.param<std::string>("/cloud_out", cloud_out, "robot_filtered_cloud");
     if (use_rgb_)
     {
@@ -113,12 +113,12 @@ private:
   void subscribe() {
     if(frames_.empty())
     {
-      ROS_DEBUG("No valid frames have been passed into the self filter. Using a callback that will just forward scans on.");
+      ROS_INFO("No valid frames have been passed into the self filter. Using a callback that will just forward scans on.");
       no_filter_sub_ = root_handle_.subscribe<sensor_msgs::PointCloud2>(cloud_in, 1, boost::bind(&SelfFilter::noFilterCallback, this, _1));
     }
     else
     {
-      ROS_DEBUG("Valid frames were passed in. We'll filter them.");
+      ROS_INFO("Valid frames were passed in. We'll filter them.");
       sub_.subscribe(root_handle_, cloud_in, max_queue_size_);
       mn_.reset(new tf::MessageFilter<sensor_msgs::PointCloud2>(sub_, tf_, "", max_queue_size_));
       mn_->setTargetFrames(frames_);
