@@ -1,8 +1,9 @@
+<?xml version="1.0"?>
 <launch>
 
   <!-- <rosparam command="load" file="$(find robot_self_filter)/config/self_filter_param.yaml" /> -->
   <arg name="calibrate" default="0" />
 
   <node unless="$(arg calibrate)" pkg="robot_self_filter" name="self_filter" type="self_filter" output="screen" respawn="true"/>
-
+  <include file="$(find pointcloud_to_laserscan)/launch/sick.launch"/>
 </launch>
